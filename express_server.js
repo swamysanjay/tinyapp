@@ -23,8 +23,14 @@ const generateRandomString = function() {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { 
+    longURL: "http://www.lighthouselabs.ca", 
+    userID: "userRandomID" 
+  },
+  "9sm5xK": { 
+    longURL: "http://www.google.com", 
+    userID: "user2RandomID" 
+  }
 };
 
 const users = { 
@@ -50,16 +56,17 @@ const addUser = (email, password) => {
   return id;
 }
 
-const checkRegister = (email, password) => {
-  if (email && password) {
-    return true;
-  }
-  return false;
-}
-
 const findUser = email => {
   return Object.values(users).find(user => user.email === email);
 }
+
+const checkPass = (user, password) => {
+  if (user.password === password) {
+    return true;
+  } else {
+    return false;
+  }
+};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -137,8 +144,17 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie('username, req.body.username');
-  res.redirect("/urls");
+  const {email, password } = req.body;
+  const user = findUser(email);
+
+  if(!user) {
+    res.send(403, "The email you have entered cannot be found");
+  } else if (!checkPass(user, password)) {
+    res.send(403, "The password is incorrect");
+  } else {
+    res.cookie('user_id', user.id);
+    res.redirect("/urls");
+  }
 });
 
 app.post("/logout", (req, res) => {
@@ -148,7 +164,7 @@ app.post("/logout", (req, res) => {
 
 app.post("/register", (req, res) => {
   const {email, password} = req.body;
-  if (!findUser(email, password)) {
+  if (!email || !password) {
     res.send(400, "The email or password is missing");
   } else if (checkEmail(email)) {
     res.send(400, "This email has already been registered.");
