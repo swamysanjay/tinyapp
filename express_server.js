@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 
 app.use(bodyParser.urlencoded({extended:true}));
+app.use(cookieParser());
 
 app.set("view engine", "ejs");
 
@@ -21,12 +22,44 @@ const generateRandomString = function() {
   return randString;
 };
 
-app.use(cookieParser());
-
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
+const addUser = (email, password) => {
+  const id = generateRandomString();
+  users[id] = {
+    id,
+    email,
+    password
+  };
+  return id;
+}
+
+const checkRegister = (email, password) => {
+  if (email && password) {
+    return true;
+  }
+  return false;
+}
+
+const checkEmail = email => {
+  return Object.values(users).find(user.email === email);
+}
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -104,6 +137,19 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect("/urls");
+})
+
+app.post("/register", (req, res) => {
+  const {email, password} = req.body;
+  if (!checkRegister(email, password)) {
+    res.send(400, "The email or password is missing");
+  } else if (checkEmail(email)) {
+    res.send(400, "This email has already been registered.");
+  } else {
+    const user_id = addUser(email, password);
+    res.cookie ('user_id', user_id);
+    res.redirect("/urls");
+  }
 })
 
 app.listen(PORT, () => {
