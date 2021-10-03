@@ -12,6 +12,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const generateRandomString = function() {
+  const array = ["A","B","C","D","E","F","G","H","I","J","K","L","M",
+    "N","O","P","Q","R","S","T","U","V","W","X","Y","Z","a","b","c","d",
+    "e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u",
+    "v","w","x","y","z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  let randString = "";
+  while (randString.length < 6) {
+    let index = Math.floor(Math.random() * 61);
+    randString += array[index];
+  }
+  return randString;
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
