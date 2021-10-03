@@ -57,7 +57,7 @@ const checkRegister = (email, password) => {
   return false;
 }
 
-const checkEmail = email => {
+const findUser = email => {
   return Object.values(users).find(user => user.email === email);
 }
 
@@ -95,6 +95,13 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  let templateVars = {
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("urls_login", templateVars);
+})
+
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
@@ -130,18 +137,18 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
+  res.cookie('username, req.body.username');
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect("/urls");
 })
 
 app.post("/register", (req, res) => {
   const {email, password} = req.body;
-  if (!checkRegister(email, password)) {
+  if (!findUser(email, password)) {
     res.send(400, "The email or password is missing");
   } else if (checkEmail(email)) {
     res.send(400, "This email has already been registered.");
