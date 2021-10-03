@@ -58,7 +58,7 @@ const checkRegister = (email, password) => {
 }
 
 const checkEmail = email => {
-  return Object.values(users).find(user.email === email);
+  return Object.values(users).find(user => user.email === email);
 }
 
 app.get("/", (req, res) => {
@@ -75,7 +75,7 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
     urls: urlDatabase
   }
   res.render("urls_index", templateVars);
@@ -83,14 +83,14 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/register", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_register", templateVars);
 });
@@ -105,7 +105,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL] 
   };
