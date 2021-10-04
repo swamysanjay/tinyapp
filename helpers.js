@@ -19,7 +19,7 @@ const addUser = (email, password) => {
   return id;
 }
 
-const urlsForUser = (id) => {
+const urlsForUser = (id, db) => {
   let filter = {};
   for (let urlID of Object.keys(db)) {
     if (db[urlID].userID === id) {

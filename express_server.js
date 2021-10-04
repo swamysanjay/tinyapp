@@ -44,15 +44,7 @@ const users = {
 //ROUTES
 // the / is for the homepage
 app.get("/", (req, res) => {
-  let templateVars = {
-    user: users[req.session.user_id],
-    urls: urlsForUser(req.session.user_id)
-  };
-  if (templateVars.user) {
-    res.render("urls_index", templateVars);
-  } else {
-    res.render("urls_login", templateVars);
-  }
+  return res.redirect("/urls");
 });
 
 app.get("/urls.json", (req, res) => {
@@ -71,7 +63,7 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = {
     user: users[req.session.user_id],
-    urls: urlsForUser(req.session.user_id)
+    urls: urlsForUser(req.session.user_id, urlDatabase)
   }
   res.render("urls_index", templateVars);
 });
@@ -115,16 +107,27 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { 
-    user: users[req.session.user_id],
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL].longURL
-  };
-  if (req.session.user_id === urlDatabase[templateVars.shortURL].userID) {
-    res.render("urls_show", templateVars);
-  } else {
+  const shortURL =  req.params.shortURL;
+  const user = users[req.session.user_id];
+  console.log(Object.keys(urlDatabase));
+  if (!user) {
+    res.status(400).send("You need to login");
+  }
+  if (!Object.keys(urlDatabase).includes(shortURL)) {
+      res.status(400).send("This URL is not found.");
+  }
+  const urls = urlsForUser(user.id, urlDatabase);
+  const longURL = urlDatabase[shortURL].longURL;
+  if (!urls[shortURL]) {
     res.status(400).send("This URL does not belong to you.");
   }
+  const templateVars = { 
+      longURL,
+      shortURL,
+      user, 
+      urls
+  };
+    res.render("urls_show", templateVars);
 });
 
 //Access the actual longURL link
@@ -148,12 +151,15 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
-  if (req.session.user_id === urlDatabase[shortURL].userID) {
-    urlDatabase[shortURL].longURL = longURL;
-    res.redirect(`/urls/${shortURL}`);
-  } else {
+
+  const user = users[req.session.user_id];
+
+  if (!user) {
     res.status(400).send("You don't have permission to delete this URL.");
-  }
+  } 
+
+    urlDatabase[shortURL].longURL = longURL;
+    res.redirect(`/urls/`);
 });
 
 app.post("/login", (req,res) => {
