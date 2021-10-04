@@ -81,7 +81,15 @@ const generateRandomString = function() {
 //Routes
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  let templateVars = {
+    user: users[req.session.user_id],
+    urls: urlsForUser(req.session.user_id)
+  };
+  if (templateVars.user) {
+    res.render("urls_index", templateVars);
+  } else {
+    res.render("urls_login", templateVars);
+  }
 });
 
 app.get("/urls.json", (req, res) => {
