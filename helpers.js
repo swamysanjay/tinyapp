@@ -1,27 +1,29 @@
 const bcrypt = require('bcryptjs');
-const urlDatabase = require('./express_server');
-const users = require('./express_server');
+const db = require('./express_server');
 
 const getUserByEmail = (email, database) => {
   return Object.values(database).find(user => user.email === email);
 }
 
+
 const addUser = (email, password) => {
   const hashPass = bcrypt.hashSync(password, 10);
   const id = generateRandomString();
-  users[id] = {
+  //console.log(db.users);
+  db.users[id] = {
     id,
     email,
     password: hashPass
   };
+  //console.log(db.users);
   return id;
 }
 
 const urlsForUser = (id) => {
   let filter = {};
-  for (let urlID of Object.keys(urlDatabase)) {
-    if (urlDatabase[urlID].userID === id) {
-      filter[urlID] = urlDatabase[urlID];
+  for (let urlID of Object.keys(db)) {
+    if (db[urlID].userID === id) {
+      filter[urlID] = db[urlID];
     }
   }
   return filter;

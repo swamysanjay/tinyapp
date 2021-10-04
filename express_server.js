@@ -42,8 +42,9 @@ const users = {
   }
 }
 
-//Routes
+//ROUTES
 
+// the / is for the homepage
 app.get("/", (req, res) => {
   let templateVars = {
     user: users[req.session.user_id],
@@ -87,10 +88,8 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-app.get("/register", (req, res) => {
-  let templateVars = {
-    user : users[req.session.user_id]
-  };
+app.get("/register", (req,res) => {
+  let templateVars = { user: users[req.session.user_id] };
   res.render("urls_register", templateVars);
 });
 
@@ -153,14 +152,13 @@ app.post("/urls/:shortURL", (req, res) => {
   }
 });
 
-app.post("/login", (req, res) => {
-  const {email, password } = req.body;
+app.post("/login", (req,res) => {
+  const { email, password } = req.body;
   const user = getUserByEmail(email, users);
-
-  if(!user) {
-    res.status(403).send("The email you have entered cannot be found");
+  if (!user) {
+    res.status(403).send("Email cannot be found");
   } else if (!bcrypt.compareSync(password, user.password)) {
-    res.status(403).send("The password is incorrect");
+    res.status(403).send("Wrong password");
   } else {
     req.session.user_id = user.id;
     res.redirect("/urls");
@@ -173,18 +171,20 @@ app.post("/logout", (req, res) => {
 })
 
 app.post("/register", (req, res) => {
-  const {email, password} = req.body;
+  const { email, password } = req.body;
   if (!email || !password) {
-    res.status(400).send("The email or password is missing.");
+    res.status(400).send('Email and/or password is missing');
   } else if (getUserByEmail(email, users)) {
-    res.status(400).send("This email has already been registered");
+    res.status(400).send('This email has already been registered')
   } else {
     const user_id = addUser(email, password);
     req.session.user_id = user_id;
     res.redirect("/urls");
   }
-})
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+module.exports.users = users;
