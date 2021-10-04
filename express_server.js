@@ -17,7 +17,6 @@ app.use(
 app.set("view engine", "ejs");
 
 //Databases
-
 const urlDatabase = {
   "b2xVn2": { 
     longURL: "http://www.lighthouselabs.ca", 
@@ -43,7 +42,6 @@ const users = {
 }
 
 //ROUTES
-
 // the / is for the homepage
 app.get("/", (req, res) => {
   let templateVars = {
@@ -69,6 +67,7 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+//list of user's URLs
 app.get("/urls", (req, res) => {
   let templateVars = {
     user: users[req.session.user_id],
@@ -77,6 +76,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//Page to create the short URL
 app.get("/urls/new", (req, res) => {
   let templateVars = {
     user: users[req.session.user_id]
@@ -88,11 +88,13 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+//REGISTER
 app.get("/register", (req,res) => {
   let templateVars = { user: users[req.session.user_id] };
   res.render("urls_register", templateVars);
 });
 
+//LOGIN
 app.get("/login", (req, res) => {
   let templateVars = {
     user: users[req.session.user_id]
@@ -125,12 +127,14 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 });
 
+//Access the actual longURL link
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
 
+//delete a short URL
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   if (req.session.user_id === urlDatabase[shortURL].userID) {
