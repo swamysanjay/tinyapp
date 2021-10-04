@@ -57,8 +57,8 @@ const addUser = (email, password) => {
   return id;
 }
 
-const findUser = email => {
-  return Object.values(users).find(user => user.email === email);
+const getUserByEmail = (email, database) => {
+  return Object.values(database).find(user => user.email === email);
 }
 
 const urlsForUser = (id) => {
@@ -189,7 +189,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 app.post("/login", (req, res) => {
   const {email, password } = req.body;
-  const user = findUser(email);
+  const user = getUserByEmail(email, users);
 
   if(!user) {
     res.status(403).send("The email you have entered cannot be found");
@@ -210,7 +210,7 @@ app.post("/register", (req, res) => {
   const {email, password} = req.body;
   if (!email || !password) {
     res.status(400).send("The email or password is missing.");
-  } else if (findUser(email)) {
+  } else if (getUserByEmail(email, users)) {
     res.status(400).send("This email has already been registered");
   } else {
     const user_id = addUser(email, password);
