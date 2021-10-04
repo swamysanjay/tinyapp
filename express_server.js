@@ -99,7 +99,11 @@ app.get("/urls", (req, res) => {
     user: users[req.cookies["user_id"]],
     urls: urlsForUser(req.cookies["user_id"])
   }
-  res.render("urls_index", templateVars);
+  if (templateVars.user) {
+    res.render("urls_index", templateVars);
+  } else {
+    res.status(400).send("You will need to login or register to access this page.");
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -145,7 +149,14 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL].longURL
   };
-  res.render("urls_show", templateVars);
+  if (!templateVars.user) {
+    res.status(400).send("You will need to login or register to access this page.");
+  }
+  if (req.cookies["user_id"] === urlDatabase[templateVars.shortURL].userID) {
+    res.render("urls_show", templateVars);
+  } else {
+    res.status(400).send("This URL does not belong to you.");
+  }
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -155,20 +166,24 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  const shortURL = req.params.shortURL;
+  if (req.cookies["user_id"] === urlDatabase[shortURL].userID) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls");
+  } else {
+    res.status(400).send("You don't have permission to delete this URL.");
+  }
 });
 
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
-  urlDatabase[shortURL].longURL = longURL;
-  templateVars = {
-    longURL,
-    user: users[req.cookies["user_id"]],
-    shortURL
+  if (req.cookies["user_id"] === urlDatabase[shortURL].userID) {
+    urlDatabase[shortURL].longURL = longURL;
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.status(400).send("You don't have permission to delete this URL.");
   }
-  res.render(`urls_show`, templateVars);
 });
 
 app.post("/login", (req, res) => {
