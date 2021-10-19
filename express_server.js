@@ -44,7 +44,12 @@ const users = {
 //ROUTES
 // the / is for the homepage
 app.get("/", (req, res) => {
-  return res.redirect("/login");
+  const user = users[req.session.userID];
+
+  if (!user) {
+    return res.redirect("/login");
+  }
+  res.redirect("/urls");
 });
 
 //list of user's URLs
