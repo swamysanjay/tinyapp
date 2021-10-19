@@ -45,7 +45,6 @@ const users = {
 // the / is for the homepage
 app.get("/", (req, res) => {
   const user = users[req.session.userID];
-
   if (!user) {
     return res.redirect("/login");
   }
@@ -75,14 +74,22 @@ app.get("/urls/new", (req, res) => {
 
 //REGISTER
 app.get("/register", (req,res) => {
-  let templateVars = { user: users[req.session.userID] };
+  const user = users[req.session.userID];
+  if (user) {
+    return res.redirect("/urls");
+  }
+  let templateVars = { user: null };
   return res.render("urls_register", templateVars);
 });
 
 //LOGIN
 app.get("/login", (req, res) => {
+  const user = users[req.session.userID];
+  if (user) {
+    return res.redirect("/urls");
+  }
   let templateVars = {
-    user: users[req.session.userID]
+    user: null
   };
   return res.render("urls_login", templateVars);
 });
@@ -152,15 +159,15 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
+  const userID = req.session.userID;
+
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
-
-  const user = users[req.session.userID];
-
-  if (!user) {
+  
+  if (!userID || userID !== urlDatabase[shortURL].userID) {
     return res.status(400).send("You don't have permission to edit this URL.");
   }
-
+  
   urlDatabase[shortURL].longURL = longURL;
   return res.redirect(`/urls/`);
 });
